@@ -97,8 +97,10 @@
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  color: #999;
+  color: var(--text-tertiary);
   font-size: 14px;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .loading-spinner {

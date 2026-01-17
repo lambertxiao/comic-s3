@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { safeDecodeURIComponent } from '@/lib/url-utils';
@@ -26,9 +26,11 @@ export default function ReaderPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+  const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
   const [chapters, setChapters] = useState<string[]>([]);
   const [currentChapterIndex, setCurrentChapterIndex] = useState(-1);
+  const imageItemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     if (comicName && chapterName) {
@@ -55,6 +57,39 @@ export default function ReaderPage() {
       console.error('Error fetching chapters:', err);
     }
   };
+
+  // 设置 Intersection Observer 用于懒加载
+  useEffect(() => {
+    if (images.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = parseInt(entry.target.getAttribute('data-index') || '0', 10);
+            setVisibleImages((prev) => new Set([...prev, index]));
+            // 一旦开始加载，就不再需要观察了
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        rootMargin: '500px', // 提前500px开始加载
+        threshold: 0.01,
+      }
+    );
+
+    // 观察所有图片容器
+    imageItemRefs.current.forEach((item, index) => {
+      if (item) {
+        observer.observe(item);
+      }
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [images]);
 
   useEffect(() => {
     if (images.length === 0) return;
@@ -117,6 +152,10 @@ export default function ReaderPage() {
     try {
       setLoading(true);
       setError(null);
+      // 重置加载状态
+      setLoadedImages(new Set());
+      setVisibleImages(new Set());
+      
       // comicName和chapterName已经是解码后的值，需要重新编码用于API调用
       const encodedComicName = encodeURIComponent(comicName);
       const encodedChapterName = encodeURIComponent(chapterName);
@@ -137,8 +176,19 @@ export default function ReaderPage() {
         throw new Error(data.error || 'Failed to fetch images');
       }
       
-      setImages(data.images || []);
-      if (!data.images || data.images.length === 0) {
+      const imagesList = data.images || [];
+      setImages(imagesList);
+      
+      // 立即加载前3张图片（第一张和接下来的两张）
+      if (imagesList.length > 0) {
+        const initialVisible = new Set<number>();
+        for (let i = 0; i < Math.min(3, imagesList.length); i++) {
+          initialVisible.add(i);
+        }
+        setVisibleImages(initialVisible);
+      }
+      
+      if (imagesList.length === 0) {
         setError(`未找到图片。请检查路径：${comicName}/${chapterName}`);
       }
     } catch (err) {
@@ -151,6 +201,14 @@ export default function ReaderPage() {
 
   const handleImageLoad = (index: number) => {
     setLoadedImages((prev) => new Set([...prev, index]));
+  };
+
+  const setImageItemRef = (index: number, element: HTMLDivElement | null) => {
+    if (element) {
+      imageItemRefs.current.set(index, element);
+    } else {
+      imageItemRefs.current.delete(index);
+    }
   };
 
   if (loading) {
@@ -209,23 +267,39 @@ export default function ReaderPage() {
         )}
         {!loading && images.length > 0 && (
           <div className="images-list">
-            {images.map((image, index) => (
-              <div key={image.key} className="image-item">
-                {!loadedImages.has(index) && (
-                  <div className="image-placeholder">
-                    <div className="loading-spinner"></div>
-                    <span>加载中...</span>
-                  </div>
-                )}
-                <img
-                  src={image.url}
-                  alt={`第 ${index + 1} 页`}
-                  onLoad={() => handleImageLoad(index)}
-                  onError={() => handleImageLoad(index)}
-                  className={loadedImages.has(index) ? 'loaded' : 'loading'}
-                />
-              </div>
-            ))}
+            {images.map((image, index) => {
+              const shouldLoad = visibleImages.has(index);
+              const isLoaded = loadedImages.has(index);
+              
+              return (
+                <div
+                  key={image.key}
+                  ref={(el) => setImageItemRef(index, el)}
+                  className="image-item"
+                  data-index={index}
+                >
+                  {!isLoaded && shouldLoad && (
+                    <div className="image-placeholder">
+                      <div className="loading-spinner"></div>
+                      <span>加载中...</span>
+                    </div>
+                  )}
+                  {!shouldLoad && (
+                    <div className="image-placeholder">
+                      <span>滚动查看</span>
+                    </div>
+                  )}
+                  <img
+                    src={shouldLoad ? image.url : undefined}
+                    data-src={image.url}
+                    alt={`第 ${index + 1} 页`}
+                    onLoad={() => handleImageLoad(index)}
+                    onError={() => handleImageLoad(index)}
+                    className={isLoaded ? 'loaded' : 'loading'}
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
