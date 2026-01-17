@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { safeDecodeURIComponent } from '@/lib/url-utils';
 import { ThemeToggle } from '@/app/components/ThemeToggle';
 import './reader.css';
@@ -26,12 +27,34 @@ export default function ReaderPage() {
   const [error, setError] = useState<string | null>(null);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
+  const [chapters, setChapters] = useState<string[]>([]);
+  const [currentChapterIndex, setCurrentChapterIndex] = useState(-1);
 
   useEffect(() => {
     if (comicName && chapterName) {
       fetchImages();
+      fetchChapters();
     }
   }, [comicName, chapterName]);
+
+  const fetchChapters = async () => {
+    try {
+      const encodedComicName = encodeURIComponent(comicName);
+      const response = await fetch(`/api/comics/${encodedComicName}`);
+      if (!response.ok) {
+        return;
+      }
+      const data = await response.json();
+      const chaptersList = data.chapters || [];
+      setChapters(chaptersList);
+      
+      // 找到当前章节的索引
+      const index = chaptersList.findIndex((ch: string) => ch === chapterName);
+      setCurrentChapterIndex(index);
+    } catch (err) {
+      console.error('Error fetching chapters:', err);
+    }
+  };
 
   useEffect(() => {
     if (images.length === 0) return;
@@ -209,9 +232,25 @@ export default function ReaderPage() {
 
       {images.length > 0 && (
         <div className="page-indicator">
+          {currentChapterIndex > 0 && (
+            <Link
+              href={`/comic/${encodeURIComponent(comicName)}/${encodeURIComponent(chapters[currentChapterIndex - 1])}`}
+              className="chapter-nav-btn prev-chapter"
+            >
+              ← 上一章
+            </Link>
+          )}
           <span className="page-text">
             {currentPage} / {images.length}
           </span>
+          {currentChapterIndex >= 0 && currentChapterIndex < chapters.length - 1 && (
+            <Link
+              href={`/comic/${encodeURIComponent(comicName)}/${encodeURIComponent(chapters[currentChapterIndex + 1])}`}
+              className="chapter-nav-btn next-chapter"
+            >
+              下一章 →
+            </Link>
+          )}
         </div>
       )}
     </div>

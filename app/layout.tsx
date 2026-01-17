@@ -3,7 +3,7 @@ import { ThemeProvider } from './theme-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: '漫画网站',
+  title: '想看漫画',
   description: '在线阅读漫画',
 };
 

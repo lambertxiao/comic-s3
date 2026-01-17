@@ -1,7 +1,7 @@
 {
   "name": "comic-website",
   "version": "1.0.0",
-  "description": "漫画网站 - 从S3读取和展示漫画",
+  "description": "想看漫画 - 从S3读取和展示漫画",
   "private": true,
   "scripts": {
     "dev": "next dev",

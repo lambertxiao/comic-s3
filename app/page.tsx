@@ -61,7 +61,7 @@ export default function Home() {
     <div className="home-container">
       <ThemeToggle />
       <header className="header">
-        <h1>📚 漫画网站</h1>
+        <h1>📚 想看漫画</h1>
         <p>选择你想看的漫画</p>
         <Link href="/upload" className="upload-link">
           📤 上传漫画
