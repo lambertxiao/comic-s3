@@ -1,4 +1,4 @@
-import { S3Client, ListObjectsV2Command, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, ListObjectsV2Command, GetObjectCommand, PutObjectCommand, DeleteObjectsCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 // 初始化S3客户端配置
@@ -22,9 +22,9 @@ if (process.env.AWS_S3_ENDPOINT) {
 }
 
 // 初始化S3客户端
-const s3Client = new S3Client(s3Config);
+export const s3Client = new S3Client(s3Config);
 
-const BUCKET_NAME = process.env.AWS_S3_BUCKET || 'comic';
+export const BUCKET_NAME = process.env.AWS_S3_BUCKET || 'comic';
 
 // 获取漫画列表
 export async function getComicList(): Promise<string[]> {
@@ -260,6 +260,97 @@ export async function uploadFile(
       fileName,
       endpoint: process.env.AWS_S3_ENDPOINT,
       bucket: BUCKET_NAME,
+    });
+    throw error;
+  }
+}
+
+// 删除指定前缀下的所有对象
+async function deleteObjectsByPrefix(prefix: string): Promise<number> {
+  try {
+    let deletedCount = 0;
+    let continuationToken: string | undefined;
+
+    do {
+      // 列出所有对象
+      const listCommand = new ListObjectsV2Command({
+        Bucket: BUCKET_NAME,
+        Prefix: prefix,
+        ContinuationToken: continuationToken,
+      });
+
+      const listResponse = await s3Client.send(listCommand);
+      const objects = listResponse.Contents || [];
+
+      if (objects.length === 0) {
+        break;
+      }
+
+      // 批量删除（每次最多1000个对象）
+      const deleteCommand = new DeleteObjectsCommand({
+        Bucket: BUCKET_NAME,
+        Delete: {
+          Objects: objects.map((obj) => ({ Key: obj.Key! })),
+          Quiet: false,
+        },
+      });
+
+      const deleteResponse = await s3Client.send(deleteCommand);
+      deletedCount += objects.length;
+
+      continuationToken = listResponse.NextContinuationToken;
+    } while (continuationToken);
+
+    return deletedCount;
+  } catch (error: any) {
+    console.error('Error deleting objects by prefix:', {
+      message: error.message,
+      code: error.code,
+      name: error.name,
+      prefix,
+      endpoint: process.env.AWS_S3_ENDPOINT,
+      bucket: BUCKET_NAME,
+    });
+    throw error;
+  }
+}
+
+// 删除章节（删除章节下的所有文件）
+export async function deleteChapter(comicName: string, chapterName: string): Promise<number> {
+  try {
+    const prefix = `${comicName}/${chapterName}/`;
+    const deletedCount = await deleteObjectsByPrefix(prefix);
+    
+    // 同时删除章节的评论文件
+    const commentsPrefix = `${comicName}/chapters/${chapterName}/`;
+    try {
+      await deleteObjectsByPrefix(commentsPrefix);
+    } catch (error) {
+      // 评论文件可能不存在，忽略错误
+      console.log('Comments file may not exist, skipping deletion');
+    }
+    
+    return deletedCount;
+  } catch (error: any) {
+    console.error('Error deleting chapter:', {
+      message: error.message,
+      comicName,
+      chapterName,
+    });
+    throw error;
+  }
+}
+
+// 删除漫画（删除漫画下的所有内容，包括章节、封面、评论等）
+export async function deleteComic(comicName: string): Promise<number> {
+  try {
+    const prefix = `${comicName}/`;
+    const deletedCount = await deleteObjectsByPrefix(prefix);
+    return deletedCount;
+  } catch (error: any) {
+    console.error('Error deleting comic:', {
+      message: error.message,
+      comicName,
     });
     throw error;
   }

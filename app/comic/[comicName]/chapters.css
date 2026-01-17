@@ -9,6 +9,13 @@
   margin-bottom: 40px;
 }
 
+.chapters-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
 .back-btn {
   background: var(--button-bg);
   border: 1px solid var(--border-color);
@@ -44,6 +51,19 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.chapter-card-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chapter-link {
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
 }
 
 .chapter-card {
@@ -90,6 +110,78 @@
 .chapter-arrow {
   color: var(--text-tertiary);
   font-size: 20px;
+}
+
+.delete-chapter-btn {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.delete-chapter-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: scale(1.05);
+}
+
+.delete-chapter-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.delete-message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.delete-message.success {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.delete-message.error {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.delete-comic-btn {
+  padding: 10px 20px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.delete-comic-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.delete-comic-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .empty-state {
@@ -403,6 +495,16 @@
 @media (max-width: 768px) {
   .chapters-header h1 {
     font-size: 28px;
+  }
+
+  .chapters-header-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .delete-comic-btn {
+    width: 100%;
+    margin-top: 12px;
   }
 
   .chapter-card {

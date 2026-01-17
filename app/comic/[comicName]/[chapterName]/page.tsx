@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { safeDecodeURIComponent } from '@/lib/url-utils';
 import { ThemeToggle } from '@/app/components/ThemeToggle';
+import CommentSection from '@/app/components/CommentSection';
 import './reader.css';
 
 interface ImageData {
@@ -327,6 +328,11 @@ export default function ReaderPage() {
           )}
         </div>
       )}
+
+      <CommentSection
+        comicName={comicName}
+        chapterName={chapterName}
+      />
     </div>
   );
 }

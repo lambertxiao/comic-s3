@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { safeDecodeURIComponent } from '@/lib/url-utils';
 import { ThemeToggle } from '@/app/components/ThemeToggle';
+import CommentSection from '@/app/components/CommentSection';
 import './chapters.css';
 
 interface ChaptersResponse {
@@ -31,6 +32,14 @@ export default function ChaptersPage() {
   const [uploadingChapter, setUploadingChapter] = useState(false);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const chapterFileInputRef = useRef<HTMLInputElement>(null);
+  
+  // 删除章节相关状态
+  const [deletingChapter, setDeletingChapter] = useState<string | null>(null);
+  const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
+  
+  // 删除漫画相关状态
+  const [deletingComic, setDeletingComic] = useState(false);
+  const [deleteComicMessage, setDeleteComicMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (comicName) {
@@ -187,6 +196,75 @@ export default function ChaptersPage() {
     }
   };
 
+  const handleDeleteChapter = async (chapterName: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!confirm(`确定要删除章节 "${chapterName}" 吗？此操作不可恢复！`)) {
+      return;
+    }
+    
+    setDeletingChapter(chapterName);
+    setDeleteMessage(null);
+    
+    try {
+      const encodedComicName = encodeURIComponent(comicName);
+      const encodedChapterName = encodeURIComponent(chapterName);
+      const response = await fetch(`/api/comics/${encodedComicName}/${encodedChapterName}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setDeleteMessage(`成功删除章节：${chapterName}`);
+        // 刷新章节列表
+        setTimeout(() => {
+          fetchChapters();
+          setDeleteMessage(null);
+        }, 1000);
+      } else {
+        setDeleteMessage(data.error || '删除失败');
+      }
+    } catch (err) {
+      setDeleteMessage(err instanceof Error ? err.message : '删除失败，请重试');
+    } finally {
+      setDeletingChapter(null);
+    }
+  };
+
+  const handleDeleteComic = async () => {
+    if (!confirm(`确定要删除漫画 "${comicName}" 吗？此操作将删除该漫画的所有章节、封面和评论，且不可恢复！`)) {
+      return;
+    }
+    
+    setDeletingComic(true);
+    setDeleteComicMessage(null);
+    
+    try {
+      const encodedComicName = encodeURIComponent(comicName);
+      const response = await fetch(`/api/comics/${encodedComicName}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setDeleteComicMessage(`成功删除漫画：${comicName}`);
+        // 延迟跳转，让用户看到成功消息
+        setTimeout(() => {
+          router.push('/');
+        }, 1500);
+      } else {
+        setDeleteComicMessage(data.error || '删除失败');
+      }
+    } catch (err) {
+      setDeleteComicMessage(err instanceof Error ? err.message : '删除失败，请重试');
+    } finally {
+      setDeletingComic(false);
+    }
+  };
+
   if (loading) {
     return <div className="loading">加载中...</div>;
   }
@@ -215,9 +293,27 @@ export default function ChaptersPage() {
         <button className="back-btn" onClick={() => router.push('/')}>
           ← 返回
         </button>
-        <h1>{comicName}</h1>
-        <p>选择章节</p>
+        <div className="chapters-header-content">
+          <div>
+            <h1>{comicName}</h1>
+            <p>选择章节</p>
+          </div>
+          <button
+            className="delete-comic-btn"
+            onClick={handleDeleteComic}
+            disabled={deletingComic}
+            title="删除漫画"
+          >
+            {deletingComic ? '删除中...' : '删除漫画'}
+          </button>
+        </div>
       </header>
+      
+      {deleteComicMessage && (
+        <div className={`delete-message ${deleteComicMessage.includes('成功') ? 'success' : 'error'}`}>
+          {deleteComicMessage}
+        </div>
+      )}
 
       <div className="cover-section">
         <div className="cover-preview-container">
@@ -331,6 +427,12 @@ export default function ChaptersPage() {
         )}
       </div>
 
+      {deleteMessage && (
+        <div className={`delete-message ${deleteMessage.includes('成功') ? 'success' : 'error'}`}>
+          {deleteMessage}
+        </div>
+      )}
+
       <div className="chapters-list">
         {chapters.length === 0 ? (
           <div className="empty-state">
@@ -338,19 +440,34 @@ export default function ChaptersPage() {
           </div>
         ) : (
           chapters.map((chapter, index) => (
-            <Link
-              key={chapter}
-              href={`/comic/${encodedComicName}/${encodeURIComponent(chapter)}`}
-            >
-              <div className="chapter-card">
-                <span className="chapter-number">{index + 1}</span>
-                <span className="chapter-name">{chapter}</span>
-                <span className="chapter-arrow">→</span>
-              </div>
-            </Link>
+            <div key={chapter} className="chapter-card-wrapper">
+              <Link
+                href={`/comic/${encodedComicName}/${encodeURIComponent(chapter)}`}
+                className="chapter-link"
+              >
+                <div className="chapter-card">
+                  <span className="chapter-number">{index + 1}</span>
+                  <span className="chapter-name">{chapter}</span>
+                  <span className="chapter-arrow">→</span>
+                </div>
+              </Link>
+              <button
+                className="delete-chapter-btn"
+                onClick={(e) => handleDeleteChapter(chapter, e)}
+                disabled={deletingChapter === chapter}
+                title="删除章节"
+              >
+                {deletingChapter === chapter ? '删除中...' : '×'}
+              </button>
+            </div>
           ))
         )}
       </div>
+
+      <CommentSection
+        comicName={comicName}
+        chapterName={null}
+      />
     </div>
   );
 }
