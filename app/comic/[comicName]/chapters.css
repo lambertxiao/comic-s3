@@ -1,0 +1,105 @@
+.chapters-container {
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.chapters-header {
+  max-width: 800px;
+  margin: 0 auto 30px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 10px 0;
+  margin-bottom: 10px;
+  transition: color 0.3s;
+}
+
+.back-btn:hover {
+  color: #1565c0;
+}
+
+.chapters-header h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.chapters-header p {
+  font-size: 16px;
+  color: #666;
+}
+
+.chapters-list {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chapter-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.chapter-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.chapter-number {
+  background: #1976d2;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.chapter-name {
+  flex: 1;
+  font-size: 18px;
+  color: #333;
+}
+
+.chapter-arrow {
+  color: #999;
+  font-size: 20px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 18px;
+}
+
+@media (max-width: 768px) {
+  .chapters-header h1 {
+    font-size: 28px;
+  }
+
+  .chapter-card {
+    padding: 15px;
+  }
+
+  .chapter-name {
+    font-size: 16px;
+  }
+}
