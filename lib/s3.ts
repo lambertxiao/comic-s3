@@ -189,7 +189,7 @@ export async function getImageUrl(key: string): Promise<string> {
 // 获取漫画封面图
 export async function getComicCover(comicName: string): Promise<string | null> {
   try {
-    // 首先尝试查找封面图（cover.jpg, cover.png等）
+    // 只查找封面图（cover.jpg, cover.png等），不再使用第一张图作为默认封面
     const coverNames = ['cover.jpg', 'cover.jpeg', 'cover.png', 'cover.webp'];
     
     for (const coverName of coverNames) {
@@ -214,17 +214,7 @@ export async function getComicCover(comicName: string): Promise<string | null> {
       }
     }
 
-    // 如果没有封面图，尝试获取第一个章节的第一张图片
-    const chapters = await getChapters(comicName);
-    if (chapters.length > 0) {
-      const firstChapter = chapters[0];
-      const images = await getChapterImages(comicName, firstChapter);
-      if (images.length > 0) {
-        const url = await getImageUrl(images[0]);
-        return url;
-      }
-    }
-
+    // 如果没有找到封面图，返回 null
     return null;
   } catch (error: any) {
     console.error('Error fetching comic cover:', {
@@ -238,7 +228,7 @@ export async function getComicCover(comicName: string): Promise<string | null> {
 // 上传文件到S3
 export async function uploadFile(
   comicName: string,
-  chapterName: string,
+  chapterName: string | null,
   fileName: string,
   fileBuffer: Buffer,
   contentType: string

@@ -99,6 +99,307 @@
   font-size: 16px;
 }
 
+.cover-section {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 2px 8px var(--shadow);
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.cover-preview-container {
+  flex-shrink: 0;
+  width: 120px;
+  aspect-ratio: 3 / 4;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+.cover-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
+.cover-upload-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cover-input {
+  display: none;
+}
+
+.cover-upload-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-align: center;
+  width: fit-content;
+}
+
+.cover-upload-btn:hover:not(:disabled) {
+  background: var(--button-hover);
+  border-color: var(--border-hover);
+}
+
+.cover-upload-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cover-message {
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.cover-message.success {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.cover-message.error {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.upload-chapter-section {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.toggle-upload-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.toggle-upload-btn:hover {
+  background: var(--button-hover);
+  border-color: var(--border-hover);
+}
+
+.upload-chapter-form {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.upload-chapter-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upload-chapter-form .form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.upload-chapter-form .form-group input[type="text"] {
+  padding: 10px 14px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+
+.upload-chapter-form .form-group input[type="text"]:focus {
+  outline: none;
+  border-color: var(--border-hover);
+  background: var(--card-bg);
+}
+
+.upload-chapter-form .form-group input[type="text"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.upload-chapter-form .file-input-wrapper {
+  position: relative;
+}
+
+.upload-chapter-form .file-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.upload-chapter-form .file-input-label {
+  display: inline-block;
+  padding: 10px 20px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-align: center;
+  width: fit-content;
+}
+
+.upload-chapter-form .file-input-label:hover:not(:disabled) {
+  background: var(--button-hover);
+  border-color: var(--border-hover);
+}
+
+.upload-chapter-form .file-input:disabled + .file-input-label {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.upload-chapter-form .file-list {
+  margin-top: 12px;
+}
+
+.upload-chapter-form .file-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.upload-chapter-form .file-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upload-chapter-form .file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.upload-chapter-form .file-item .file-name {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+.upload-chapter-form .file-item .file-size {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.upload-chapter-form .remove-file-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.upload-chapter-form .remove-file-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.upload-message {
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 6px;
+}
+
+.upload-message.success {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.upload-message.error {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.submit-chapter-btn {
+  padding: 12px 24px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.submit-chapter-btn:hover:not(:disabled) {
+  background: var(--button-hover);
+  border-color: var(--border-hover);
+}
+
+.submit-chapter-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .chapters-header h1 {
     font-size: 28px;

@@ -54,38 +54,44 @@
 
 .comic-card {
   background: var(--card-bg);
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 0;
+  padding: 0;
   text-align: center;
   transition: all 0.2s ease;
   cursor: pointer;
   border: 1px solid var(--card-border);
   box-shadow: 0 2px 8px var(--shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .comic-card:hover {
   transform: translateY(-4px);
   border-color: var(--border-hover);
-  background: var(--card-hover);
   box-shadow: 0 4px 12px var(--shadow-hover);
 }
 
 .comic-icon {
   font-size: 48px;
-  margin-bottom: 12px;
+  padding: 24px;
   opacity: 0.9;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
 }
 
 .comic-cover {
   width: 100%;
   aspect-ratio: 3 / 4;
-  margin-bottom: 12px;
-  border-radius: 8px;
   overflow: hidden;
   background: var(--bg-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .comic-cover img {
@@ -101,6 +107,9 @@
   word-break: break-word;
   font-weight: 500;
   line-height: 1.4;
+  padding: 12px;
+  margin: 0;
+  background: var(--card-bg);
 }
 
 .empty-state {
