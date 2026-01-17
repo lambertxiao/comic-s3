@@ -25,12 +25,70 @@ export default function ReaderPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     if (comicName && chapterName) {
       fetchImages();
     }
   }, [comicName, chapterName]);
+
+  useEffect(() => {
+    if (images.length === 0) return;
+
+    const handleScroll = () => {
+      const imageItems = document.querySelectorAll('.image-item');
+      if (imageItems.length === 0) return;
+
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+      let currentIndex = 0;
+
+      imageItems.forEach((item, index) => {
+        const rect = item.getBoundingClientRect();
+        const itemTop = rect.top + window.scrollY;
+        const itemBottom = itemTop + rect.height;
+
+        if (scrollPosition >= itemTop && scrollPosition <= itemBottom) {
+          currentIndex = index + 1;
+        }
+      });
+
+      // 如果没找到，检查是否在最后一张图片之后
+      if (currentIndex === 0) {
+        const lastItem = imageItems[imageItems.length - 1];
+        if (lastItem) {
+          const lastRect = lastItem.getBoundingClientRect();
+          const lastTop = lastRect.top + window.scrollY;
+          if (scrollPosition > lastTop) {
+            currentIndex = images.length;
+          }
+        }
+      }
+
+      // 如果还是没找到，检查是否在第一张图片之前
+      if (currentIndex === 0) {
+        const firstItem = imageItems[0];
+        if (firstItem) {
+          const firstRect = firstItem.getBoundingClientRect();
+          const firstTop = firstRect.top + window.scrollY;
+          if (scrollPosition < firstTop) {
+            currentIndex = 1;
+          }
+        }
+      }
+
+      if (currentIndex > 0) {
+        setCurrentPage(currentIndex);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // 初始调用
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [images]);
 
   const fetchImages = async () => {
     try {
@@ -148,6 +206,14 @@ export default function ReaderPage() {
           </div>
         )}
       </div>
+
+      {images.length > 0 && (
+        <div className="page-indicator">
+          <span className="page-text">
+            {currentPage} / {images.length}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
