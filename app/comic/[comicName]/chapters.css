@@ -1,19 +1,239 @@
 .chapters-container {
   min-height: 100vh;
-  padding: 40px 20px;
-  max-width: 800px;
-  margin: 0 auto;
+  padding: 0;
+  max-width: 100%;
+  margin: 0;
 }
 
-.chapters-header {
+/* Banner 区域样式 */
+.comic-banner {
+  position: relative;
+  width: 100%;
+  height: 50vh;
+  min-height: 400px;
+  max-height: 600px;
+  overflow: hidden;
   margin-bottom: 40px;
 }
 
-.chapters-header-content {
+.banner-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.banner-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--card-bg) 100%);
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+}
+
+.banner-placeholder-icon {
+  font-size: 80px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.banner-placeholder p {
+  font-size: 18px;
+  opacity: 0.7;
+}
+
+.banner-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to top,
+    var(--bg-primary) 0%,
+    rgba(0, 0, 0, 0.4) 20%,
+    transparent 50%,
+    transparent 100%
+  );
+  z-index: 2;
+}
+
+[data-theme='light'] .banner-overlay {
+  background: linear-gradient(
+    to top,
+    var(--bg-primary) 0%,
+    rgba(255, 255, 255, 0.6) 20%,
+    transparent 50%,
+    transparent 100%
+  );
+}
+
+.banner-content {
+  position: relative;
+  z-index: 3;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   justify-content: space-between;
+  padding: 24px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.banner-back-btn {
+  align-self: flex-start;
+  margin-bottom: auto;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.banner-back-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.banner-info {
+  margin-top: auto;
+  margin-bottom: 0;
+}
+
+.banner-title {
+  font-size: 48px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.banner-subtitle {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+  margin: 0;
+  font-weight: 400;
+}
+
+.banner-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
   align-items: flex-start;
-  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.edit-mode-toggle-btn {
+  padding: 10px 20px;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+
+.edit-mode-toggle-btn:hover {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.7);
+}
+
+.edit-mode-toggle-btn:active {
+  transform: scale(0.98);
+}
+
+.banner-upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.banner-input {
+  display: none;
+}
+
+.banner-upload-btn {
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+
+.banner-upload-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.banner-upload-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.banner-message {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.banner-message.success {
+  background-color: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.banner-message.error {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.banner-delete-btn {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: white;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.banner-delete-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.4);
+  border-color: rgba(239, 68, 68, 0.7);
+}
+
+.chapters-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px 40px;
 }
 
 .back-btn {
@@ -34,22 +254,10 @@
   border-color: var(--border-hover);
 }
 
-.chapters-header h1 {
-  font-size: 36px;
-  margin-bottom: 8px;
-  color: var(--text-primary);
-  font-weight: 700;
-}
-
-.chapters-header p {
-  font-size: 16px;
-  color: var(--text-secondary);
-  font-weight: 400;
-}
 
 .chapters-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 12px;
 }
 
@@ -68,11 +276,11 @@
 
 .chapter-card {
   background: var(--card-bg);
-  border-radius: 10px;
-  padding: 16px 20px;
+  border-radius: 8px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   transition: all 0.2s ease;
   cursor: pointer;
   border: 1px solid var(--card-border);
@@ -88,39 +296,39 @@
 .chapter-number {
   background: var(--bg-tertiary);
   color: var(--text-primary);
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
   flex-shrink: 0;
-  font-size: 14px;
+  font-size: 12px;
   border: 1px solid var(--border-color);
 }
 
 .chapter-name {
   flex: 1;
-  font-size: 16px;
+  font-size: 14px;
   color: var(--text-primary);
   font-weight: 500;
 }
 
 .chapter-arrow {
   color: var(--text-tertiary);
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .delete-chapter-btn {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: #ef4444;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -493,25 +701,59 @@
 }
 
 @media (max-width: 768px) {
-  .chapters-header h1 {
-    font-size: 28px;
+  .comic-banner {
+    height: 40vh;
+    min-height: 300px;
+    max-height: 400px;
   }
 
-  .chapters-header-content {
+  .banner-content {
+    padding: 16px 20px;
+  }
+
+  .banner-title {
+    font-size: 32px;
+  }
+
+  .banner-subtitle {
+    font-size: 14px;
+  }
+
+  .banner-actions {
     flex-direction: column;
-    align-items: stretch;
   }
 
-  .delete-comic-btn {
+  .banner-upload-section,
+  .banner-delete-btn {
     width: 100%;
-    margin-top: 12px;
+  }
+
+  .chapters-content {
+    padding: 0 20px 40px;
+  }
+
+  .chapters-list {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
   }
 
   .chapter-card {
-    padding: 15px;
+    padding: 10px 12px;
   }
 
   .chapter-name {
-    font-size: 16px;
+    font-size: 13px;
+  }
+
+  .chapter-number {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .delete-chapter-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
   }
 }

@@ -225,6 +225,45 @@ export async function getComicCover(comicName: string): Promise<string | null> {
   }
 }
 
+// 获取漫画Banner图
+export async function getComicBanner(comicName: string): Promise<string | null> {
+  try {
+    // 查找Banner图（banner.jpg, banner.png等）
+    const bannerNames = ['banner.jpg', 'banner.jpeg', 'banner.png', 'banner.webp'];
+    
+    for (const bannerName of bannerNames) {
+      const bannerKey = `${comicName}/${bannerName}`;
+      try {
+        // 使用ListObjectsV2Command检查文件是否存在
+        const listCommand = new ListObjectsV2Command({
+          Bucket: BUCKET_NAME,
+          Prefix: bannerKey,
+          MaxKeys: 1,
+        });
+        const listResponse = await s3Client.send(listCommand);
+        
+        // 如果找到文件，生成URL
+        if (listResponse.Contents && listResponse.Contents.length > 0) {
+          const url = await getImageUrl(bannerKey);
+          return url;
+        }
+      } catch {
+        // 继续尝试下一个
+        continue;
+      }
+    }
+
+    // 如果没有找到Banner图，返回 null
+    return null;
+  } catch (error: any) {
+    console.error('Error fetching comic banner:', {
+      message: error.message,
+      comicName,
+    });
+    return null;
+  }
+}
+
 // 上传文件到S3
 export async function uploadFile(
   comicName: string,

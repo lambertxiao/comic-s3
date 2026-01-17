@@ -25,6 +25,12 @@ export default function ChaptersPage() {
   const [coverMessage, setCoverMessage] = useState<string | null>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
   
+  // Banner图相关状态
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [bannerMessage, setBannerMessage] = useState<string | null>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+  
   // 上传章节相关状态
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [chapterName, setChapterName] = useState('');
@@ -40,11 +46,15 @@ export default function ChaptersPage() {
   // 删除漫画相关状态
   const [deletingComic, setDeletingComic] = useState(false);
   const [deleteComicMessage, setDeleteComicMessage] = useState<string | null>(null);
+  
+  // 编辑模式状态
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     if (comicName) {
       fetchChapters();
       fetchCover();
+      fetchBanner();
     }
   }, [comicName]);
 
@@ -78,6 +88,22 @@ export default function ChaptersPage() {
       const comic = data.comics.find((c: any) => c.name === comicName);
       if (comic && comic.coverUrl) {
         setCoverUrl(comic.coverUrl);
+      }
+    } catch (err) {
+      // 静默失败
+    }
+  };
+
+  const fetchBanner = async () => {
+    try {
+      const encodedComicName = encodeURIComponent(comicName);
+      const response = await fetch(`/api/comics/${encodedComicName}/banner`);
+      if (!response.ok) {
+        return;
+      }
+      const data = await response.json();
+      if (data.bannerUrl) {
+        setBannerUrl(data.bannerUrl);
       }
     } catch (err) {
       // 静默失败
@@ -196,6 +222,49 @@ export default function ChaptersPage() {
     }
   };
 
+  const handleBannerChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setBannerMessage('请选择有效的图片文件');
+      return;
+    }
+
+    setUploadingBanner(true);
+    setBannerMessage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('banner', file);
+      const encodedComicName = encodeURIComponent(comicName);
+      const response = await fetch(`/api/comics/${encodedComicName}/banner`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '上传失败');
+      }
+
+      const data = await response.json();
+      setBannerMessage('Banner图上传成功');
+      
+      // 重新获取Banner URL
+      setTimeout(() => {
+        fetchBanner();
+      }, 500);
+    } catch (err) {
+      setBannerMessage(err instanceof Error ? err.message : '上传失败');
+    } finally {
+      setUploadingBanner(false);
+      if (bannerInputRef.current) {
+        bannerInputRef.current.value = '';
+      }
+    }
+  };
+
   const handleDeleteChapter = async (chapterName: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -289,25 +358,70 @@ export default function ChaptersPage() {
   return (
     <div className="chapters-container">
       <ThemeToggle />
-      <header className="chapters-header">
-        <button className="back-btn" onClick={() => router.push('/')}>
-          ← 返回
-        </button>
-        <div className="chapters-header-content">
-          <div>
-            <h1>{comicName}</h1>
-            <p>选择章节</p>
-          </div>
-          <button
-            className="delete-comic-btn"
-            onClick={handleDeleteComic}
-            disabled={deletingComic}
-            title="删除漫画"
-          >
-            {deletingComic ? '删除中...' : '删除漫画'}
-          </button>
+      
+      {/* Banner 区域 */}
+      <div className="comic-banner">
+        <div className="banner-background">
+          {bannerUrl || coverUrl ? (
+            <img src={bannerUrl || coverUrl || ''} alt={comicName} className="banner-image" />
+          ) : (
+            <div className="banner-placeholder">
+              <div className="banner-placeholder-icon">📖</div>
+              <p>暂无Banner图</p>
+            </div>
+          )}
+          <div className="banner-overlay"></div>
         </div>
-      </header>
+        <div className="banner-content">
+          <button className="back-btn banner-back-btn" onClick={() => router.push('/')}>
+            ← 返回
+          </button>
+          <div className="banner-info">
+            <h1 className="banner-title">{comicName}</h1>
+            <p className="banner-subtitle">选择章节开始阅读</p>
+          </div>
+          <div className="banner-actions">
+            <button
+              className="edit-mode-toggle-btn"
+              onClick={() => setEditMode(!editMode)}
+              title={editMode ? '退出编辑模式' : '进入编辑模式'}
+            >
+              {editMode ? '✓ 编辑模式' : '✎ 编辑'}
+            </button>
+            {editMode && (
+              <>
+                <div className="banner-upload-section">
+                  <input
+                    ref={bannerInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBannerChange}
+                    className="banner-input"
+                    id="banner-input"
+                    disabled={uploadingBanner}
+                  />
+                  <label htmlFor="banner-input" className="banner-upload-btn">
+                    {uploadingBanner ? '上传中...' : bannerUrl ? '更换Banner' : '上传Banner'}
+                  </label>
+                  {bannerMessage && (
+                    <div className={`banner-message ${bannerMessage.includes('成功') ? 'success' : 'error'}`}>
+                      {bannerMessage}
+                    </div>
+                  )}
+                </div>
+                <button
+                  className="delete-comic-btn banner-delete-btn"
+                  onClick={handleDeleteComic}
+                  disabled={deletingComic}
+                  title="删除漫画"
+                >
+                  {deletingComic ? '删除中...' : '删除漫画'}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
       
       {deleteComicMessage && (
         <div className={`delete-message ${deleteComicMessage.includes('成功') ? 'success' : 'error'}`}>
@@ -315,44 +429,48 @@ export default function ChaptersPage() {
         </div>
       )}
 
-      <div className="cover-section">
-        <div className="cover-preview-container">
-          {coverUrl ? (
-            <img src={coverUrl} alt="封面" className="cover-preview-image" />
-          ) : (
-            <div className="cover-placeholder">暂无封面</div>
-          )}
-        </div>
-        <div className="cover-upload-section">
-          <input
-            ref={coverInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleCoverChange}
-            className="cover-input"
-            id="cover-input"
-            disabled={uploadingCover}
-          />
-          <label htmlFor="cover-input" className="cover-upload-btn">
-            {uploadingCover ? '上传中...' : coverUrl ? '更换封面' : '上传封面'}
-          </label>
-          {coverMessage && (
-            <div className={`cover-message ${coverMessage.includes('成功') ? 'success' : 'error'}`}>
-              {coverMessage}
+      <div className="chapters-content">
+        <div className="cover-section">
+          <div className="cover-preview-container">
+            {coverUrl ? (
+              <img src={coverUrl} alt="封面" className="cover-preview-image" />
+            ) : (
+              <div className="cover-placeholder">暂无封面</div>
+            )}
+          </div>
+          {editMode && (
+            <div className="cover-upload-section">
+              <input
+                ref={coverInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleCoverChange}
+                className="cover-input"
+                id="cover-input"
+                disabled={uploadingCover}
+              />
+              <label htmlFor="cover-input" className="cover-upload-btn">
+                {uploadingCover ? '上传中...' : coverUrl ? '更换封面' : '上传封面'}
+              </label>
+              {coverMessage && (
+                <div className={`cover-message ${coverMessage.includes('成功') ? 'success' : 'error'}`}>
+                  {coverMessage}
+                </div>
+              )}
             </div>
           )}
         </div>
-      </div>
 
-      <div className="upload-chapter-section">
-        <button
-          className="toggle-upload-btn"
-          onClick={() => setShowUploadForm(!showUploadForm)}
-        >
-          {showUploadForm ? '▼ 收起上传' : '▲ 上传新章节'}
-        </button>
-        
-        {showUploadForm && (
+      {editMode && (
+        <div className="upload-chapter-section">
+          <button
+            className="toggle-upload-btn"
+            onClick={() => setShowUploadForm(!showUploadForm)}
+          >
+            {showUploadForm ? '▼ 收起上传' : '▲ 上传新章节'}
+          </button>
+          
+          {showUploadForm && (
           <form onSubmit={handleUploadChapter} className="upload-chapter-form">
             <div className="form-group">
               <label htmlFor="chapterName">章节名称 *</label>
@@ -425,7 +543,8 @@ export default function ChaptersPage() {
             </button>
           </form>
         )}
-      </div>
+        </div>
+      )}
 
       {deleteMessage && (
         <div className={`delete-message ${deleteMessage.includes('成功') ? 'success' : 'error'}`}>
@@ -451,23 +570,26 @@ export default function ChaptersPage() {
                   <span className="chapter-arrow">→</span>
                 </div>
               </Link>
-              <button
-                className="delete-chapter-btn"
-                onClick={(e) => handleDeleteChapter(chapter, e)}
-                disabled={deletingChapter === chapter}
-                title="删除章节"
-              >
-                {deletingChapter === chapter ? '删除中...' : '×'}
-              </button>
+              {editMode && (
+                <button
+                  className="delete-chapter-btn"
+                  onClick={(e) => handleDeleteChapter(chapter, e)}
+                  disabled={deletingChapter === chapter}
+                  title="删除章节"
+                >
+                  {deletingChapter === chapter ? '删除中...' : '×'}
+                </button>
+              )}
             </div>
           ))
         )}
       </div>
 
-      <CommentSection
-        comicName={comicName}
-        chapterName={null}
-      />
+        <CommentSection
+          comicName={comicName}
+          chapterName={null}
+        />
+      </div>
     </div>
   );
 }
