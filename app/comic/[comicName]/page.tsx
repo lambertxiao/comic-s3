@@ -17,6 +17,8 @@ export default function ChaptersPage() {
   const router = useRouter();
   // 安全解码，处理可能的双重编码
   const comicName = safeDecodeURIComponent(params.comicName as string);
+  // 编码后的漫画名，用于API调用和链接生成
+  const encodedComicName = encodeURIComponent(comicName);
   const [chapters, setChapters] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +32,10 @@ export default function ChaptersPage() {
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [bannerMessage, setBannerMessage] = useState<string | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
+  
+  // 精选图片相关状态
+  const [featuredImages, setFeaturedImages] = useState<any[]>([]);
+  const [loadingFeatured, setLoadingFeatured] = useState(false);
   
   // 上传章节相关状态
   const [showUploadForm, setShowUploadForm] = useState(false);
@@ -49,14 +55,10 @@ export default function ChaptersPage() {
   
   // 编辑模式状态
   const [editMode, setEditMode] = useState(false);
-
-  useEffect(() => {
-    if (comicName) {
-      fetchChapters();
-      fetchCover();
-      fetchBanner();
-    }
-  }, [comicName]);
+  
+  // 删除精选图相关状态
+  const [deletingFeatured, setDeletingFeatured] = useState<string | null>(null);
+  const [deleteFeaturedMessage, setDeleteFeaturedMessage] = useState<string | null>(null);
 
   const fetchChapters = async () => {
     try {
@@ -109,6 +111,33 @@ export default function ChaptersPage() {
       // 静默失败
     }
   };
+
+  const fetchFeaturedImages = async () => {
+    try {
+      setLoadingFeatured(true);
+      const encodedComicName = encodeURIComponent(comicName);
+      const response = await fetch(`/api/comics/${encodedComicName}/featured`);
+      if (!response.ok) {
+        return;
+      }
+      const data = await response.json();
+      setFeaturedImages(data.images || []);
+    } catch (err) {
+      console.error('Error fetching featured images:', err);
+    } finally {
+      setLoadingFeatured(false);
+    }
+  };
+
+  useEffect(() => {
+    if (comicName) {
+      fetchChapters();
+      fetchCover();
+      fetchBanner();
+      fetchFeaturedImages();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [comicName]);
 
   const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -334,6 +363,42 @@ export default function ChaptersPage() {
     }
   };
 
+  const handleDeleteFeatured = async (imageKey: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!confirm('确定要删除这张精选图吗？')) {
+      return;
+    }
+    
+    setDeletingFeatured(imageKey);
+    setDeleteFeaturedMessage(null);
+    
+    try {
+      const encodedComicName = encodeURIComponent(comicName);
+      const response = await fetch(`/api/comics/${encodedComicName}/featured?imageKey=${encodeURIComponent(imageKey)}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setDeleteFeaturedMessage('成功删除精选图');
+        // 刷新精选图列表
+        setTimeout(() => {
+          fetchFeaturedImages();
+          setDeleteFeaturedMessage(null);
+        }, 1000);
+      } else {
+        setDeleteFeaturedMessage(data.error || '删除失败');
+      }
+    } catch (err) {
+      setDeleteFeaturedMessage(err instanceof Error ? err.message : '删除失败，请重试');
+    } finally {
+      setDeletingFeatured(null);
+    }
+  };
+
   if (loading) {
     return <div className="loading">加载中...</div>;
   }
@@ -350,10 +415,6 @@ export default function ChaptersPage() {
       </div>
     );
   }
-
-  // comicName已经是解码后的值，直接使用
-  // 但在生成链接时需要编码，Next.js Link会自动处理，但为了安全我们还是手动编码
-  const encodedComicName = encodeURIComponent(comicName);
 
   return (
     <div className="chapters-container">
@@ -585,10 +646,58 @@ export default function ChaptersPage() {
         )}
       </div>
 
-        <CommentSection
-          comicName={comicName}
-          chapterName={null}
-        />
+      {/* 精选页区域 */}
+      {featuredImages.length > 0 && (
+        <div className="featured-section">
+          <h2 className="featured-title">⭐ 精选页</h2>
+          {deleteFeaturedMessage && (
+            <div className={`delete-message ${deleteFeaturedMessage.includes('成功') ? 'success' : 'error'}`}>
+              {deleteFeaturedMessage}
+            </div>
+          )}
+          <div className="featured-grid">
+            {featuredImages.map((image) => (
+              <div key={image.id} className="featured-item-wrapper">
+                <Link
+                  href={`/comic/${encodedComicName}/${encodeURIComponent(image.chapterName)}`}
+                  className="featured-item"
+                >
+                  {image.imageUrl ? (
+                    <img 
+                      src={image.imageUrl} 
+                      alt={`${image.chapterName} - 第 ${image.imageIndex + 1} 页`}
+                      className="featured-image"
+                    />
+                  ) : (
+                    <div className="featured-image-placeholder">
+                      <span>图片加载失败</span>
+                    </div>
+                  )}
+                  <div className="featured-info">
+                    <p className="featured-chapter">{image.chapterName}</p>
+                    <p className="featured-page">第 {image.imageIndex + 1} 页</p>
+                  </div>
+                </Link>
+                {editMode && (
+                  <button
+                    className="delete-featured-btn"
+                    onClick={(e) => handleDeleteFeatured(image.imageKey, e)}
+                    disabled={deletingFeatured === image.imageKey}
+                    title="删除精选图"
+                  >
+                    {deletingFeatured === image.imageKey ? '删除中...' : '×'}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <CommentSection
+        comicName={comicName}
+        chapterName={null}
+      />
       </div>
     </div>
   );

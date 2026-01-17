@@ -32,6 +32,10 @@ export default function ReaderPage() {
   const [chapters, setChapters] = useState<string[]>([]);
   const [currentChapterIndex, setCurrentChapterIndex] = useState(-1);
   const imageItemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+  
+  // 精选相关状态
+  const [featuredImages, setFeaturedImages] = useState<Set<string>>(new Set());
+  const [featuringImage, setFeaturingImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (comicName && chapterName) {
@@ -39,6 +43,34 @@ export default function ReaderPage() {
       fetchChapters();
     }
   }, [comicName, chapterName]);
+
+  // 检查图片是否已精选
+  useEffect(() => {
+    if (images.length === 0) return;
+    
+    const checkFeatured = async () => {
+      const featuredSet = new Set<string>();
+      for (const image of images) {
+        try {
+          const encodedComicName = encodeURIComponent(comicName);
+          const response = await fetch(
+            `/api/comics/${encodedComicName}/featured/check?imageKey=${encodeURIComponent(image.key)}`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            if (data.featured) {
+              featuredSet.add(image.key);
+            }
+          }
+        } catch (error) {
+          console.error('Error checking featured:', error);
+        }
+      }
+      setFeaturedImages(featuredSet);
+    };
+    
+    checkFeatured();
+  }, [images, comicName]);
 
   const fetchChapters = async () => {
     try {
@@ -212,6 +244,66 @@ export default function ReaderPage() {
     }
   };
 
+  const handleToggleFeatured = async (image: ImageData, index: number) => {
+    const imageKey = image.key;
+    const isFeatured = featuredImages.has(imageKey);
+    
+    if (featuringImage === imageKey) return; // 防止重复点击
+    
+    setFeaturingImage(imageKey);
+    
+    try {
+      if (isFeatured) {
+        // 取消精选
+        const encodedComicName = encodeURIComponent(comicName);
+        const response = await fetch(
+          `/api/comics/${encodedComicName}/featured?imageKey=${encodeURIComponent(imageKey)}`,
+          { method: 'DELETE' }
+        );
+        
+        if (response.ok) {
+          setFeaturedImages(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(imageKey);
+            return newSet;
+          });
+        } else {
+          const data = await response.json();
+          alert(data.error || '取消精选失败');
+        }
+      } else {
+        // 添加精选
+        const encodedComicName = encodeURIComponent(comicName);
+        const response = await fetch(`/api/comics/${encodedComicName}/featured`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chapterName,
+            imageKey,
+            imageIndex: index,
+          }),
+        });
+        
+        if (response.ok) {
+          setFeaturedImages(prev => new Set([...prev, imageKey]));
+        } else {
+          const data = await response.json();
+          if (data.alreadyFeatured) {
+            // 如果已经被精选，更新状态
+            setFeaturedImages(prev => new Set([...prev, imageKey]));
+          } else {
+            alert(data.error || '添加精选失败');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling featured:', error);
+      alert('操作失败，请重试');
+    } finally {
+      setFeaturingImage(null);
+    }
+  };
+
   if (loading) {
     return <div className="loading">加载中...</div>;
   }
@@ -298,6 +390,16 @@ export default function ReaderPage() {
                     onError={() => handleImageLoad(index)}
                     className={isLoaded ? 'loaded' : 'loading'}
                   />
+                  {shouldLoad && (
+                    <button
+                      className={`favorite-btn ${featuredImages.has(image.key) ? 'favorited' : ''}`}
+                      onClick={() => handleToggleFeatured(image, index)}
+                      disabled={featuringImage === image.key}
+                      title={featuredImages.has(image.key) ? '取消精选' : '加入精选'}
+                    >
+                      {featuredImages.has(image.key) ? '★' : '☆'}
+                    </button>
+                  )}
                 </div>
               );
             })}

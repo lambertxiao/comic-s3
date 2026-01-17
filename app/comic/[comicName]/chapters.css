@@ -700,6 +700,191 @@
   cursor: not-allowed;
 }
 
+/* 精选页区域样式 */
+.featured-section {
+  margin-top: 40px;
+  margin-bottom: 32px;
+}
+
+.featured-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.featured-grid {
+  column-count: 4;
+  column-gap: 20px;
+  column-fill: balance;
+}
+
+.featured-item-wrapper {
+  position: relative;
+  break-inside: avoid;
+  margin-bottom: 20px;
+  page-break-inside: avoid;
+}
+
+.featured-item {
+  background: var(--card-bg);
+  border-radius: 0;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: all 0.2s ease;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
+.featured-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px var(--shadow-hover);
+  border-color: var(--border-hover);
+}
+
+.featured-image {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+  background: var(--bg-tertiary);
+}
+
+/* 为不同位置的卡片添加不同的高度变化，创造错落感 */
+.featured-item-wrapper:nth-child(3n+1) .featured-image {
+  aspect-ratio: 3 / 4.2;
+}
+
+.featured-item-wrapper:nth-child(3n+2) .featured-image {
+  aspect-ratio: 3 / 3.8;
+}
+
+.featured-item-wrapper:nth-child(3n+3) .featured-image {
+  aspect-ratio: 3 / 4.5;
+}
+
+.featured-item-wrapper:nth-child(5n+1) .featured-image {
+  aspect-ratio: 3 / 3.6;
+}
+
+.featured-item-wrapper:nth-child(5n+3) .featured-image {
+  aspect-ratio: 3 / 4.3;
+}
+
+.featured-image-placeholder {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
+/* 占位符也应用相同的高度变化 */
+.featured-item-wrapper:nth-child(3n+1) .featured-image-placeholder {
+  aspect-ratio: 3 / 4.2;
+}
+
+.featured-item-wrapper:nth-child(3n+2) .featured-image-placeholder {
+  aspect-ratio: 3 / 3.8;
+}
+
+.featured-item-wrapper:nth-child(3n+3) .featured-image-placeholder {
+  aspect-ratio: 3 / 4.5;
+}
+
+.featured-item-wrapper:nth-child(5n+1) .featured-image-placeholder {
+  aspect-ratio: 3 / 3.6;
+}
+
+.featured-item-wrapper:nth-child(5n+3) .featured-image-placeholder {
+  aspect-ratio: 3 / 4.3;
+}
+
+.featured-info {
+  padding: 12px;
+}
+
+.featured-chapter {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+
+.featured-page {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+.delete-featured-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(239, 68, 68, 0.9);
+  border: 1px solid rgba(239, 68, 68, 1);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.delete-featured-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 1);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.delete-featured-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1200px) {
+  .featured-grid {
+    column-count: 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .featured-grid {
+    column-count: 2;
+    column-gap: 16px;
+  }
+
+  .featured-item-wrapper {
+    margin-bottom: 16px;
+  }
+
+  .featured-title {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .featured-grid {
+    column-count: 1;
+  }
+}
+
 @media (max-width: 768px) {
   .comic-banner {
     height: 40vh;

@@ -136,6 +136,50 @@
   opacity: 0;
 }
 
+.favorite-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+  padding: 0;
+}
+
+.favorite-btn:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+.favorite-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.favorite-btn.favorited {
+  background: rgba(255, 193, 7, 0.8);
+  border-color: rgba(255, 193, 7, 1);
+  color: #fff;
+}
+
+.favorite-btn.favorited:hover:not(:disabled) {
+  background: rgba(255, 193, 7, 0.9);
+  border-color: rgba(255, 193, 7, 1);
+}
+
 .page-indicator {
   position: fixed;
   bottom: 0;

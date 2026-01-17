@@ -37,7 +37,10 @@ export async function getComicList(): Promise<string[]> {
     const response = await s3Client.send(command);
     const comics = (response.CommonPrefixes || [])
       .map((prefix) => prefix.Prefix?.replace('/', ''))
-      .filter((name): name is string => !!name)
+      .filter((name): name is string => {
+        // 过滤掉以 _ 开头的目录（如 _favorites），这些是系统目录，不是漫画
+        return !!name && !name.startsWith('_');
+      })
       .sort();
 
     return comics;
