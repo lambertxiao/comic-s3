@@ -4,6 +4,50 @@
   margin: 0;
 }
 
+:root {
+  /* 白天主题 */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --card-hover: #f8fafc;
+  --button-bg: #e2e8f0;
+  --button-text: #0f172a;
+  --button-hover: #cbd5e1;
+  --accent-color: #3b82f6;
+  --accent-hover: #2563eb;
+  --shadow: rgba(0, 0, 0, 0.1);
+  --shadow-hover: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme='dark'] {
+  /* 夜晚主题 - VSCode Dark+ 风格 */
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #252526;
+  --bg-tertiary: #2d2d30;
+  --text-primary: #cccccc;
+  --text-secondary: #858585;
+  --text-tertiary: #6a6a6a;
+  --border-color: #3e3e42;
+  --border-hover: #464647;
+  --card-bg: #252526;
+  --card-border: #3e3e42;
+  --card-hover: #2a2d2e;
+  --button-bg: #3e3e42;
+  --button-text: #cccccc;
+  --button-hover: #464647;
+  --accent-color: #007acc;
+  --accent-hover: #005a9e;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-hover: rgba(0, 0, 0, 0.5);
+}
+
 html,
 body {
   max-width: 100vw;
@@ -13,8 +57,11 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f5f5;
-  color: #333;
+  background: var(--bg-primary);
+  min-height: 100vh;
+  color: var(--text-primary);
+  position: relative;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 a {
@@ -34,7 +81,7 @@ a {
   align-items: center;
   min-height: 400px;
   font-size: 18px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .error {
@@ -42,27 +89,50 @@ a {
   justify-content: center;
   align-items: center;
   min-height: 400px;
-  font-size: 18px;
-  color: #d32f2f;
+  font-size: 16px;
+  color: #f87171;
 }
 
 .btn {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #1976d2;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .btn:hover {
-  background-color: #1565c0;
+  background: var(--button-hover);
+  border-color: var(--border-hover);
 }
 
 .btn:disabled {
-  background-color: #ccc;
+  opacity: 0.5;
   cursor: not-allowed;
+}
+
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.theme-toggle:hover {
+  background: var(--card-hover);
+  border-color: var(--border-hover);
+  box-shadow: 0 4px 12px var(--shadow-hover);
 }

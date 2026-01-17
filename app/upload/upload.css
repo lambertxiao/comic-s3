@@ -13,33 +13,42 @@
 .back-link {
   display: inline-block;
   margin-bottom: 20px;
-  color: #1976d2;
+  background: var(--button-bg);
+  border: 1px solid var(--border-color);
+  color: var(--button-text);
   text-decoration: none;
-  font-size: 16px;
-  transition: color 0.3s;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 .back-link:hover {
-  color: #1565c0;
+  background: var(--button-hover);
+  border-color: var(--border-hover);
 }
 
 .upload-header h1 {
   font-size: 36px;
-  margin-bottom: 10px;
-  color: #333;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-weight: 700;
 }
 
 .upload-header p {
   font-size: 16px;
-  color: #666;
+  color: var(--text-secondary);
+  font-weight: 400;
 }
 
 .upload-form {
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
-  padding: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
+  padding: 32px;
+  margin-bottom: 24px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
 .form-group {
@@ -49,24 +58,27 @@
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  font-weight: 600;
-  color: #333;
+  font-weight: 500;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
 .form-group input[type="text"] {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 16px;
-  transition: border-color 0.3s;
+  padding: 10px 14px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--text-primary);
+  transition: all 0.2s;
   box-sizing: border-box;
 }
 
 .form-group input[type="text"]:focus {
   outline: none;
-  border-color: #1976d2;
+  border-color: var(--border-hover);
+  background: var(--card-bg);
 }
 
 .form-group input[type="text"]:disabled {
@@ -87,18 +99,20 @@
 
 .file-input-label {
   display: inline-block;
-  padding: 12px 24px;
-  background-color: #1976d2;
-  color: white;
-  border-radius: 6px;
+  padding: 10px 20px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-color);
 }
 
 .file-input-label:hover {
-  background-color: #1565c0;
+  background: var(--button-hover);
+  border-color: var(--border-hover);
 }
 
 .file-input:disabled + .file-input-label {
@@ -107,16 +121,18 @@
 }
 
 .file-list {
-  margin-top: 15px;
-  padding: 15px;
-  background-color: #f9f9f9;
-  border-radius: 6px;
+  margin-top: 16px;
+  padding: 16px;
+  background-color: var(--bg-tertiary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
 }
 
 .file-count {
-  font-weight: 600;
-  margin-bottom: 10px;
-  color: #333;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  font-size: 14px;
 }
 
 .file-list ul {
@@ -129,24 +145,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
+  padding: 12px;
   margin-bottom: 8px;
-  background: white;
-  border-radius: 4px;
-  border: 1px solid #e0e0e0;
+  background: var(--card-bg);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
 }
 
 .file-name {
   flex: 1;
-  color: #333;
+  color: var(--text-primary);
   font-size: 14px;
   word-break: break-all;
 }
 
 .file-size {
-  color: #666;
+  color: var(--text-tertiary);
   font-size: 12px;
-  margin: 0 15px;
+  margin: 0 12px;
 }
 
 .remove-file-btn {
@@ -167,6 +183,35 @@
 
 .remove-file-btn:hover {
   background: #d32f2f;
+}
+
+.cover-preview {
+  margin-top: 12px;
+}
+
+.cover-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.cover-preview-img {
+  width: 80px;
+  height: 106px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.cover-preview-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .result-message {
@@ -195,19 +240,21 @@
 }
 
 .submit-btn {
-  padding: 12px 30px;
-  background-color: #1976d2;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 16px;
+  padding: 12px 24px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.2s ease;
   flex: 1;
 }
 
 .submit-btn:hover:not(:disabled) {
-  background-color: #1565c0;
+  background: var(--button-hover);
+  border-color: var(--border-hover);
 }
 
 .submit-btn:disabled {
@@ -217,30 +264,35 @@
 
 .view-link {
   padding: 12px 24px;
-  background-color: #4caf50;
-  color: white;
+  background: var(--button-bg);
+  color: var(--button-text);
   text-decoration: none;
-  border-radius: 6px;
-  font-size: 16px;
-  transition: background-color 0.3s;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.2s ease;
   white-space: nowrap;
+  border: 1px solid var(--border-color);
 }
 
 .view-link:hover {
-  background-color: #45a049;
+  background: var(--button-hover);
+  border-color: var(--border-hover);
 }
 
 .upload-info {
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
-  padding: 25px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
 .upload-info h3 {
-  margin-bottom: 15px;
-  color: #333;
+  margin-bottom: 16px;
+  color: var(--text-primary);
   font-size: 18px;
+  font-weight: 600;
 }
 
 .upload-info ul {
@@ -251,9 +303,9 @@
 
 .upload-info li {
   padding: 8px 0;
-  color: #666;
+  color: var(--text-secondary);
   font-size: 14px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .upload-info li:last-child {
@@ -261,11 +313,12 @@
 }
 
 .upload-info code {
-  background-color: #f5f5f5;
+  background-color: var(--bg-tertiary);
   padding: 2px 6px;
-  border-radius: 3px;
+  border-radius: 4px;
   font-size: 12px;
-  color: #d32f2f;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 @media (max-width: 768px) {

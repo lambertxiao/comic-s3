@@ -3,14 +3,17 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ThemeToggle } from '../components/ThemeToggle';
 import './upload.css';
 
 export default function UploadPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
   const [comicName, setComicName] = useState('');
   const [chapterName, setChapterName] = useState('');
   const [files, setFiles] = useState<File[]>([]);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -30,6 +33,19 @@ export default function UploadPage() {
     }
   };
 
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setCoverFile(e.target.files[0]);
+    }
+  };
+
+  const handleRemoveCover = () => {
+    setCoverFile(null);
+    if (coverInputRef.current) {
+      coverInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -38,8 +54,8 @@ export default function UploadPage() {
       return;
     }
 
-    if (files.length === 0) {
-      setResult({ success: false, message: '请至少选择一个文件' });
+    if (files.length === 0 && !coverFile) {
+      setResult({ success: false, message: '请至少选择一个文件或封面图' });
       return;
     }
 
@@ -54,6 +70,9 @@ export default function UploadPage() {
       files.forEach((file) => {
         formData.append('files', file);
       });
+      if (coverFile) {
+        formData.append('cover', coverFile);
+      }
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -63,16 +82,24 @@ export default function UploadPage() {
       const data = await response.json();
 
       if (response.ok) {
+        let message = `成功上传 ${data.uploaded}/${data.total} 个文件`;
+        if (data.coverUploaded) {
+          message += '（包含封面图）';
+        }
         setResult({
           success: true,
-          message: `成功上传 ${data.uploaded}/${data.total} 个文件`,
+          message,
         });
         // 清空表单
         setComicName('');
         setChapterName('');
         setFiles([]);
+        setCoverFile(null);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
+        }
+        if (coverInputRef.current) {
+          coverInputRef.current.value = '';
         }
       } else {
         setResult({
@@ -92,6 +119,7 @@ export default function UploadPage() {
 
   return (
     <div className="upload-container">
+      <ThemeToggle />
       <header className="upload-header">
         <Link href="/" className="back-link">
           ← 返回首页
@@ -128,7 +156,51 @@ export default function UploadPage() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="files">选择图片文件 *</label>
+          <label htmlFor="cover">封面图（可选）</label>
+          <div className="file-input-wrapper">
+            <input
+              ref={coverInputRef}
+              type="file"
+              id="cover"
+              accept="image/*"
+              onChange={handleCoverChange}
+              disabled={uploading}
+              className="file-input"
+            />
+            <label htmlFor="cover" className="file-input-label">
+              选择封面图
+            </label>
+          </div>
+          {coverFile && (
+            <div className="cover-preview">
+              <div className="cover-preview-item">
+                <img 
+                  src={URL.createObjectURL(coverFile)} 
+                  alt="封面预览" 
+                  className="cover-preview-img"
+                />
+                <div className="cover-preview-info">
+                  <span className="file-name">{coverFile.name}</span>
+                  <span className="file-size">
+                    {(coverFile.size / 1024 / 1024).toFixed(2)} MB
+                  </span>
+                </div>
+                {!uploading && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveCover}
+                    className="remove-file-btn"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="files">选择图片文件 {files.length === 0 && !coverFile ? '*' : ''}</label>
           <div className="file-input-wrapper">
             <input
               ref={fileInputRef}
@@ -179,7 +251,7 @@ export default function UploadPage() {
         <div className="form-actions">
           <button
             type="submit"
-            disabled={uploading || files.length === 0}
+            disabled={uploading || (files.length === 0 && !coverFile)}
             className="submit-btn"
           >
             {uploading ? '上传中...' : '开始上传'}
@@ -199,6 +271,8 @@ export default function UploadPage() {
           <li>文件将按照上传顺序保存到S3</li>
           <li>路径格式：<code>comic/漫画名/章节名/文件名</code></li>
           <li>建议文件名包含序号，如：001.jpg, 002.jpg</li>
+          <li>封面图（可选）：上传后会保存为 <code>comic/漫画名/cover.jpg</code></li>
+          <li>封面图会自动显示在漫画列表中</li>
         </ul>
       </div>
     </div>

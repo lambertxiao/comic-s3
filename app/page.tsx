@@ -2,14 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/app/components/ThemeToggle';
 import './home.css';
 
+interface Comic {
+  name: string;
+  coverUrl: string | null;
+}
+
 interface ComicListResponse {
-  comics: string[];
+  comics: Comic[];
 }
 
 export default function Home() {
-  const [comics, setComics] = useState<string[]>([]);
+  const [comics, setComics] = useState<Comic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,6 +59,7 @@ export default function Home() {
 
   return (
     <div className="home-container">
+      <ThemeToggle />
       <header className="header">
         <h1>📚 漫画网站</h1>
         <p>选择你想看的漫画</p>
@@ -68,10 +75,16 @@ export default function Home() {
           </div>
         ) : (
           comics.map((comic) => (
-            <Link key={comic} href={`/comic/${encodeURIComponent(comic)}`}>
+            <Link key={comic.name} href={`/comic/${encodeURIComponent(comic.name)}`}>
               <div className="comic-card">
-                <div className="comic-icon">📖</div>
-                <h3>{comic}</h3>
+                {comic.coverUrl ? (
+                  <div className="comic-cover">
+                    <img src={comic.coverUrl} alt={comic.name} />
+                  </div>
+                ) : (
+                  <div className="comic-icon">📖</div>
+                )}
+                <h3>{comic.name}</h3>
               </div>
             </Link>
           ))

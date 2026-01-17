@@ -186,6 +186,55 @@ export async function getImageUrl(key: string): Promise<string> {
   }
 }
 
+// 获取漫画封面图
+export async function getComicCover(comicName: string): Promise<string | null> {
+  try {
+    // 首先尝试查找封面图（cover.jpg, cover.png等）
+    const coverNames = ['cover.jpg', 'cover.jpeg', 'cover.png', 'cover.webp'];
+    
+    for (const coverName of coverNames) {
+      const coverKey = `${comicName}/${coverName}`;
+      try {
+        // 使用ListObjectsV2Command检查文件是否存在
+        const listCommand = new ListObjectsV2Command({
+          Bucket: BUCKET_NAME,
+          Prefix: coverKey,
+          MaxKeys: 1,
+        });
+        const listResponse = await s3Client.send(listCommand);
+        
+        // 如果找到文件，生成URL
+        if (listResponse.Contents && listResponse.Contents.length > 0) {
+          const url = await getImageUrl(coverKey);
+          return url;
+        }
+      } catch {
+        // 继续尝试下一个
+        continue;
+      }
+    }
+
+    // 如果没有封面图，尝试获取第一个章节的第一张图片
+    const chapters = await getChapters(comicName);
+    if (chapters.length > 0) {
+      const firstChapter = chapters[0];
+      const images = await getChapterImages(comicName, firstChapter);
+      if (images.length > 0) {
+        const url = await getImageUrl(images[0]);
+        return url;
+      }
+    }
+
+    return null;
+  } catch (error: any) {
+    console.error('Error fetching comic cover:', {
+      message: error.message,
+      comicName,
+    });
+    return null;
+  }
+}
+
 // 上传文件到S3
 export async function uploadFile(
   comicName: string,
@@ -195,8 +244,12 @@ export async function uploadFile(
   contentType: string
 ): Promise<string> {
   try {
-    // 构建S3 key: comic/漫画名/章节名/文件名
-    const key = `${comicName}/${chapterName}/${fileName}`;
+    // 构建S3 key
+    // 如果chapterName为空，说明是封面图，路径为: comic/漫画名/文件名
+    // 否则路径为: comic/漫画名/章节名/文件名
+    const key = chapterName 
+      ? `${comicName}/${chapterName}/${fileName}`
+      : `${comicName}/${fileName}`;
 
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,

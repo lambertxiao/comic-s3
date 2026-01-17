@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { safeDecodeURIComponent } from '@/lib/url-utils';
+import { ThemeToggle } from '@/app/components/ThemeToggle';
 import './reader.css';
 
 interface ImageData {
@@ -107,6 +108,7 @@ export default function ReaderPage() {
 
   return (
     <div className="reader-container">
+      <ThemeToggle />
       <header className="reader-header">
         <button className="back-btn" onClick={() => router.back()}>
           ← 返回章节列表

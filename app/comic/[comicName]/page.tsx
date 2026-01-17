@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { safeDecodeURIComponent } from '@/lib/url-utils';
+import { ThemeToggle } from '@/app/components/ThemeToggle';
 import './chapters.css';
 
 interface ChaptersResponse {
@@ -67,6 +68,7 @@ export default function ChaptersPage() {
 
   return (
     <div className="chapters-container">
+      <ThemeToggle />
       <header className="chapters-header">
         <button className="back-btn" onClick={() => router.push('/')}>
           ← 返回

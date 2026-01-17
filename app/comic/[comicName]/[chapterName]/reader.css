@@ -1,34 +1,37 @@
 .reader-container {
   min-height: 100vh;
-  background-color: #1a1a1a;
-  color: white;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .reader-header {
-  background: rgba(0, 0, 0, 0.8);
-  padding: 15px 20px;
+  background: var(--card-bg);
+  padding: 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
 .back-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 16px;
+  background: var(--button-bg);
+  border: 1px solid var(--border-color);
+  color: var(--button-text);
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 4px;
-  transition: background-color 0.3s;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .back-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background: var(--button-hover);
+  border-color: var(--border-hover);
 }
 
 .reader-info {
@@ -39,16 +42,19 @@
 .reader-info h2 {
   font-size: 18px;
   margin-bottom: 4px;
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .reader-info p {
   font-size: 14px;
-  color: #ccc;
+  color: var(--text-secondary);
 }
 
 .reader-progress {
   font-size: 14px;
-  color: #ccc;
+  color: var(--text-tertiary);
+  font-weight: 500;
 }
 
 .reader-content {
@@ -61,8 +67,8 @@
   justify-content: center;
   align-items: center;
   min-height: 400px;
-  color: #999;
-  font-size: 16px;
+  color: var(--text-tertiary);
+  font-size: 15px;
 }
 
 .images-list {
@@ -96,10 +102,10 @@
 }
 
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #1976d2;
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--text-tertiary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
