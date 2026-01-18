@@ -6,10 +6,14 @@ import Link from 'next/link';
 import { safeDecodeURIComponent } from '@/lib/url-utils';
 import { ThemeToggle } from '@/app/components/ThemeToggle';
 import CommentSection from '@/app/components/CommentSection';
+import { ErrorDisplay } from '@/app/components/ErrorDisplay';
 import './chapters.css';
 
 interface ChaptersResponse {
   chapters: string[];
+  error?: string;
+  isS3Error?: boolean;
+  originalError?: string;
 }
 
 export default function ChaptersPage() {
@@ -22,6 +26,8 @@ export default function ChaptersPage() {
   const [chapters, setChapters] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isS3Error, setIsS3Error] = useState(false);
+  const [originalError, setOriginalError] = useState<string | undefined>();
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [coverMessage, setCoverMessage] = useState<string | null>(null);
@@ -63,17 +69,34 @@ export default function ChaptersPage() {
   const fetchChapters = async () => {
     try {
       setLoading(true);
+      setError(null);
+      setIsS3Error(false);
       // comicName已经是解码后的值，需要重新编码用于API调用
       const encodedComicName = encodeURIComponent(comicName);
       const response = await fetch(`/api/comics/${encodedComicName}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch chapters');
-      }
       const data: ChaptersResponse = await response.json();
+      
+      if (!response.ok || data.error) {
+        throw new Error(data.error || 'Failed to fetch chapters');
+      }
+      
       setChapters(data.chapters);
-      setError(null);
+      // 成功时清除所有错误状态
+      setIsS3Error(false);
+      setOriginalError(undefined);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMessage);
+      // 尝试从响应中获取S3错误信息
+      try {
+        const encodedComicName = encodeURIComponent(comicName);
+        const response = await fetch(`/api/comics/${encodedComicName}`);
+        const data = await response.json();
+        setIsS3Error(data.isS3Error || false);
+        setOriginalError(data.originalError);
+      } catch {
+        // 忽略
+      }
     } finally {
       setLoading(false);
     }
@@ -405,13 +428,17 @@ export default function ChaptersPage() {
 
   if (error) {
     return (
-      <div className="error">
-        <div>
-          <p>错误: {error}</p>
-          <button className="btn" onClick={fetchChapters} style={{ marginTop: '20px' }}>
-            重试
-          </button>
-        </div>
+      <div className="chapters-container">
+        <ThemeToggle />
+        <ErrorDisplay
+          title="无法加载章节列表"
+          message={error}
+          error={originalError}
+          onRetry={fetchChapters}
+          showDetails={process.env.NODE_ENV === 'development'}
+          autoRetry={isS3Error}
+          retryInterval={5000}
+        />
       </div>
     );
   }

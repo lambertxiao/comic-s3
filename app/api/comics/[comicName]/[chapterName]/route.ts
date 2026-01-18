@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { safeDecodeURIComponent } from '@/lib/url-utils';
 import { deleteChapter, getChapterImages, getImageUrl } from '@/lib/s3';
+import { isS3ConnectionError, getFriendlyErrorMessage } from '@/lib/error-utils';
 
 // GET: 获取章节图片列表
 export async function GET(
@@ -24,9 +25,17 @@ export async function GET(
     return NextResponse.json({ images });
   } catch (error: any) {
     console.error('Error fetching chapter images:', error);
+    
+    const isS3Err = isS3ConnectionError(error);
+    const friendlyMessage = getFriendlyErrorMessage(error);
+    
     return NextResponse.json(
-      { error: error.message || '获取章节图片失败' },
-      { status: 500 }
+      { 
+        error: friendlyMessage,
+        isS3Error: isS3Err,
+        originalError: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
+      { status: isS3Err ? 503 : 500 }
     );
   }
 }
@@ -49,9 +58,17 @@ export async function DELETE(
     });
   } catch (error: any) {
     console.error('Error deleting chapter:', error);
+    
+    const isS3Err = isS3ConnectionError(error);
+    const friendlyMessage = getFriendlyErrorMessage(error);
+    
     return NextResponse.json(
-      { error: error.message || '删除章节失败' },
-      { status: 500 }
+      { 
+        error: friendlyMessage,
+        isS3Error: isS3Err,
+        originalError: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
+      { status: isS3Err ? 503 : 500 }
     );
   }
 }

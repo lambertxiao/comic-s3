@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getChapters, deleteComic } from '@/lib/s3';
 import { safeDecodeURIComponent } from '@/lib/url-utils';
+import { isS3ConnectionError, getFriendlyErrorMessage } from '@/lib/error-utils';
 
 export async function GET(
   request: Request,
@@ -16,9 +17,17 @@ export async function GET(
       error: error.message,
       params: params.comicName,
     });
+    
+    const isS3Err = isS3ConnectionError(error);
+    const friendlyMessage = getFriendlyErrorMessage(error);
+    
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch chapters' },
-      { status: 500 }
+      { 
+        error: friendlyMessage,
+        isS3Error: isS3Err,
+        originalError: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
+      { status: isS3Err ? 503 : 500 }
     );
   }
 }
@@ -40,9 +49,17 @@ export async function DELETE(
     });
   } catch (error: any) {
     console.error('Error deleting comic:', error);
+    
+    const isS3Err = isS3ConnectionError(error);
+    const friendlyMessage = getFriendlyErrorMessage(error);
+    
     return NextResponse.json(
-      { error: error.message || '删除漫画失败' },
-      { status: 500 }
+      { 
+        error: friendlyMessage,
+        isS3Error: isS3Err,
+        originalError: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
+      { status: isS3Err ? 503 : 500 }
     );
   }
 }

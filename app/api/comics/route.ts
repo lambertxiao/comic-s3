@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getComicList, getComicCover } from '@/lib/s3';
+import { isS3ConnectionError, getFriendlyErrorMessage } from '@/lib/error-utils';
 
 export async function GET() {
   try {
@@ -17,11 +18,19 @@ export async function GET() {
     );
 
     return NextResponse.json({ comics: comicsWithCovers });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in /api/comics:', error);
+    
+    const isS3Err = isS3ConnectionError(error);
+    const friendlyMessage = getFriendlyErrorMessage(error);
+    
     return NextResponse.json(
-      { error: 'Failed to fetch comics' },
-      { status: 500 }
+      { 
+        error: friendlyMessage,
+        isS3Error: isS3Err,
+        originalError: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
+      { status: isS3Err ? 503 : 500 }
     );
   }
 }

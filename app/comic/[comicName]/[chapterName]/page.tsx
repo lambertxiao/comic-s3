@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { safeDecodeURIComponent } from '@/lib/url-utils';
 import { ThemeToggle } from '@/app/components/ThemeToggle';
 import CommentSection from '@/app/components/CommentSection';
+import { ErrorDisplay } from '@/app/components/ErrorDisplay';
 import './reader.css';
 
 interface ImageData {
@@ -15,6 +16,9 @@ interface ImageData {
 
 interface ImagesResponse {
   images: ImageData[];
+  error?: string;
+  isS3Error?: boolean;
+  originalError?: string;
 }
 
 export default function ReaderPage() {
@@ -26,6 +30,8 @@ export default function ReaderPage() {
   const [images, setImages] = useState<ImageData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isS3Error, setIsS3Error] = useState(false);
+  const [originalError, setOriginalError] = useState<string | undefined>();
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const [visibleImages, setVisibleImages] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState(1);
@@ -185,6 +191,7 @@ export default function ReaderPage() {
     try {
       setLoading(true);
       setError(null);
+      setIsS3Error(false);
       // 重置加载状态
       setLoadedImages(new Set());
       setVisibleImages(new Set());
@@ -197,7 +204,7 @@ export default function ReaderPage() {
       console.log('Decoded values:', { comicName, chapterName });
       
       const response = await fetch(url);
-      const data = await response.json();
+      const data: ImagesResponse = await response.json();
       
       console.log('API response:', { 
         ok: response.ok, 
@@ -205,12 +212,18 @@ export default function ReaderPage() {
         data 
       });
       
-      if (!response.ok) {
+      if (!response.ok || data.error) {
+        setIsS3Error(data.isS3Error || false);
+        setOriginalError(data.originalError);
         throw new Error(data.error || 'Failed to fetch images');
       }
       
       const imagesList = data.images || [];
       setImages(imagesList);
+      
+      // 成功时清除所有错误状态
+      setIsS3Error(false);
+      setOriginalError(undefined);
       
       // 立即加载前3张图片（第一张和接下来的两张）
       if (imagesList.length > 0) {
@@ -226,7 +239,19 @@ export default function ReaderPage() {
       }
     } catch (err) {
       console.error('Error fetching images:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMessage);
+      // 尝试从响应中获取S3错误信息
+      try {
+        const encodedComicName = encodeURIComponent(comicName);
+        const encodedChapterName = encodeURIComponent(chapterName);
+        const response = await fetch(`/api/comics/${encodedComicName}/${encodedChapterName}`);
+        const data = await response.json();
+        setIsS3Error(data.isS3Error || false);
+        setOriginalError(data.originalError);
+      } catch {
+        // 忽略
+      }
     } finally {
       setLoading(false);
     }
@@ -310,13 +335,17 @@ export default function ReaderPage() {
 
   if (error) {
     return (
-      <div className="error">
-        <div>
-          <p>错误: {error}</p>
-          <button className="btn" onClick={fetchImages} style={{ marginTop: '20px' }}>
-            重试
-          </button>
-        </div>
+      <div className="reader-container">
+        <ThemeToggle />
+        <ErrorDisplay
+          title="无法加载章节内容"
+          message={error}
+          error={originalError}
+          onRetry={fetchImages}
+          showDetails={process.env.NODE_ENV === 'development'}
+          autoRetry={isS3Error}
+          retryInterval={5000}
+        />
       </div>
     );
   }
